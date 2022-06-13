@@ -517,6 +517,46 @@ https://doc.akka.io/docs/akka/current/stream/operators/index.html
 
 ---
 
+### Stateful Operators
+
+- State_less_ operators: `map`, `filter`, etc.
+- Stateful operators: `fold`, `reduce`, etc.
+- Most powerful is `statefulMapConcat`
+
+```scala
+val source: Source[Int, NotUsed] = ???
+
+source
+  .statefulMapConcat { () =>
+    // safe to keep state here
+    var state = ???
+
+    // invoked on every element
+    element => {
+      val elementsToEmit = List[Int]()
+
+      // return a list of elements
+      elementsToEmit
+    }
+  }
+```
+
+---
+
+### StatefulMapConcat Example
+
+```scala
+def zipWithIndex[A]: Flow[A, (A, Int), _] =
+  Flow[A].statefulMapConcat { () =>
+    var i = -1
+    element => {
+      i += 1
+      (element -> i) :: Nil
+    }
+  }
+```
+
+---
 class: center, middle
 
 # Integration
