@@ -46,7 +46,7 @@ class: center, middle
 # Akka Streams Basics
 Brennan Holten
 
-@47deg / @bjholten
+@47deg
 
 ???
 
@@ -58,7 +58,7 @@ Questions any time
 
 1. Review Futures
 2. Akka Streams basics
-3. Best practices, architecture, etc.
+3. Integration, fault tolerance, testing
 
 ---
 
@@ -453,10 +453,12 @@ class: center, middle
 - The `Materializer` looks at the Graph description and executes it (using Actors)
 
 ```scala
+val numbers = Source(1 to 10)
+val double  = Flow[Int].map(_ * 2)
+val sum     = Sink.fold(0)((acc: Int, next: Int) => acc + next)
+
 def eventuallyResult: Future[Int] =
-  Source(1 to 10)
-    .map(_ * 2)
-    .runFold(0)((acc, next) => acc + next)
+  numbers.via(double).runWith(sum)
 ```
 
 In this example, the _materialized value_ is the `Future[Int]` returned after summing all the numbers together.
@@ -515,102 +517,143 @@ class: center, middle
 
 ---
 
-### Integrating with Actors
+### Integrating with External Services
 
-- example
+- Make external services return `Future`
+- `mapAsync[T](parallelism: Int)(f: Out => Future[T])`
+- `mapAsyncUnordered[T](parallelism: Int)(f: Out => Future[T])`
+
+```scala
+trait WeatherApi {
+  def getTemperature(city: String): Future[Double]
+}
+
+val cities = Source(List("chicago", "seattle"))
+
+// 5 parallel requests, Maintains order
+cities.mapAsync(parallelism = 5)(city => getTemperature(city))
+// Does not maintain order
+cities.mapAsyncUnordered(parallelism = 5)(city => getTemperature(city))
+```
 
 ---
 
-### Integrating with External Services
+### Integrating with Actors
 
-- example
+```scala
+trait Ack
+object Ack extends Ack
+
+trait Protocol
+case class Init(ackTo: ActorRef[Ack]) extends Protocol
+case class Message(ackTo: ActorRef[Ack], msg: String) extends Protocol
+case object Complete extends Protocol
+case class Fail(ex: Throwable) extends Protocol
+
+val actor: ActorRef[Protocol] = ???
+
+val sink: Sink[String, NotUsed] =
+  ActorSink
+    .actorRefWithBackpressure(
+      ref = actor,
+      messageAdapter = (responseActorRef: ActorRef[Ack], element) =>
+        Message(responseActorRef, element),
+      onInitMessage = (responseActorRef: ActorRef[Ack]) =>
+        Init(responseActorRef),
+      ackMessage = Ack,
+      onCompleteMessage = Complete,
+      onFailureMessage = (exception) => Fail(exception)
+    )
+```
 
 ---
 
 ### Fault Tolerance and Error Handling
 
-- example
+- Can recover with a value
+- Recover with another stream
+- Backoff supervision
+
+```scala
+val source = Source(1 to 100)
+
+// recovery with default value
+source.recover {
+  case _: RuntimeException => 42
+}
+
+// recover to new stream
+source.recoverWithRetries(3, {
+  case _: RuntimeException => Source(101 to 200)
+})
+
+// restart with supervisor strategy
+RestartSource.onFailuresWithBackoff(
+  RestartSettings(
+    minBackoff = 1.second,
+    maxBackoff = 2.seconds,
+    randomFactor = 0.1
+  )
+)(() => source)
+```
 
 ---
 
 
 ### Testing Akka Streams
 
-- example
+- Two options:
+  1. Test them like you test regular `Futures`
+  2. `TestProbe` to intercept messages
+
 
 ---
 
-class: center, middle
+### Testing Akka Streams
 
-# Patterns and Best Practices
+```scala
+"integrate with test actors" in {
+  import akka.pattern.pipe
+  import system.dispatcher
 
+  val source = Source(1 to 10)
+  val sink = Sink.fold(0)((acc: Int, next: Int) => acc + next)
+
+  val probe = TestProbe()
+  source.runWith(sink).pipeTo(probe.ref)
+
+  probe.expectMsg(55)
+}
+```
 ---
 
-### Structuring your application
+### Testing Akka Streams
 
-- Akka Streams can be thought of as a DSL for creating `Future`s
-- Hide effects behind `Future`s or `Actor`s
-- `Future` becomes your fundamental effect type
+```scala
+"can test within a stream" in {
+  val flow = Flow[Int].map(_ * 2)
+  val testSource = TestSource.probe[Int]
+  val testSink = TestSink.probe[Int]
 
----
+  val materialized =
+    testSource.via(flow).toMat(testSink)(Keep.both).run()
+  val (publisher, subscriber) = materialized
 
-class: center, middle
+  publisher
+    .sendNext(1)
+    .sendNext(5)
+    .sendNext(42)
+    .sendNext(99)
+    .sendComplete()
 
-# Stream Graphs
-
----
-
-### Graph DSL
-
-- Example
-
----
-
-### Open and Closed Graph Shapes
-
-- example
-
----
-
-### Graph Materialized Values
-
-- example
+  subscriber
+    .request(4)
+    .expectNext(2, 10, 84, 198)
+    .expectComplete()
+}
+```
 
 ---
-
-### Bidirectional Flows
-
-- example
-
----
-
-### Cycles
-
-- example
-
----
-
-### Dynamic Stream Handling
-
-- example
-
----
-
-### Substreams
-
-- example
-
----
-
-### Custom Graph Shapes
-
-- example
-
----
-
-### Custom Operators and Custom Graph Stages
-
-- example
 
 class: center, middle
 

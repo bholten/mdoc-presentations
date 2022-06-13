@@ -49,7 +49,12 @@ lazy val `akka-streams-basics` = project
   .settings(mdocModule: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-stream" % "2.6.19"
+      "com.typesafe.akka" %% "akka-stream" % "2.6.19",
+      "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
+      "com.typesafe.akka" %% "akka-stream-typed" % "2.6.19",
+      "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.19" % Test,
+      "com.typesafe.akka" %% "akka-testkit" % "2.6.19" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.11" % Test
     )
   )
   .enablePlugins(MdocPlugin)
