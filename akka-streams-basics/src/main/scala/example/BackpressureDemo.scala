@@ -29,10 +29,11 @@ object BackpressureDemo {
     // fastSource.to(slowSink).run()
     // fastSource.async.to(slowSink).run()
     // fastSource.async.via(flow).async.to(slowSink).run()
-     val bufferedFlow = flow.buffer(10, overflowStrategy = OverflowStrategy.dropHead)
+    val bufferedFlow =
+      flow.buffer(10, overflowStrategy = OverflowStrategy.dropHead)
     // fastSource.async.via(bufferedFlow).async.to(slowSink).run()
-     val throttledSource = fastSource.throttle(1, 2.second)
-     throttledSource.via(bufferedFlow).to(slowSink).run()
+    val throttledSource = fastSource.throttle(1, 2.second)
+    throttledSource.via(bufferedFlow).to(slowSink).run()
 
     ()
   }
