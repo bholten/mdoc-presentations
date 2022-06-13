@@ -54,9 +54,9 @@ indexHtml=$(cat <<- EOF
 class: center, middle
 
 # $1
-James Santucci • \`@jisantuc\`
+Brennan Holten
 
-@47Degrees / @jisantuc
+@47deg
 
 ???
 
