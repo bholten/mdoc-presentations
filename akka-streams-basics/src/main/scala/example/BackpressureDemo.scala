@@ -35,24 +35,6 @@ object BackpressureDemo {
     val throttledSource = fastSource.throttle(1, 2.second)
     throttledSource.via(bufferedFlow).to(slowSink).run()
 
-    val source = Source(1 to 100)
-
-    source.recover { case _: RuntimeException =>
-      42
-    }
-
-    source recoverWithRetries (3, { case _: RuntimeException =>
-      Source(101 to 200)
-    })
-
-    RestartSource.onFailuresWithBackoff(
-      RestartSettings(
-        minBackoff = 1.second,
-        maxBackoff = 2.seconds,
-        randomFactor = 0.1
-      )
-    )(() => source)
-
     ()
   }
 }
