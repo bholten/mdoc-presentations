@@ -1,0 +1,15 @@
+title Canonical Example
+
+participant Publisher
+
+participant (s) Subscription
+
+participant (sub) Subscriber
+
+Publisher->(s) Subscription:
+Publisher->(sub) Subscriber:onSubscribe(s)
+(s) Subscription<-(sub) Subscriber:request(100)
+Publisher->(sub) Subscriber:onNext("foo")
+Publisher->(sub) Subscriber:onNext("bar")
+Publisher->(sub) Subscriber:onNext("baz")
+Publisher->(sub) Subscriber:onComplete()
