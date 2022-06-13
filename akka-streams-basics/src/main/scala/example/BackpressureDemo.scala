@@ -3,10 +3,10 @@ package example
 import akka._
 import akka.actor._
 import akka.stream._
-import akka.stream.scaladsl.{Flow, RestartSource, Sink, Source}
+import akka.stream.scaladsl.{Flow, Sink, Source}
 
-import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 object BackpressureDemo {
   implicit val system: ActorSystem = ActorSystem()
