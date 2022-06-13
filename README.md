@@ -27,6 +27,8 @@ browser to view the slides.
 Publication happens through the `publish.yml` GitHub action. It's
 basically `scripts/docs` + a GitHub pages publication action.
 
+### Resources
+
 This project was generated using [Giter8][g8] with template
 [presentation.g8][presentation.g8]
 
