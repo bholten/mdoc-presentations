@@ -33,8 +33,6 @@ object BackpressureDemo {
       flow.buffer(10, overflowStrategy = OverflowStrategy.dropHead)
     // fastSource.async.via(bufferedFlow).async.to(slowSink).run()
     val throttledSource = fastSource.throttle(1, 2.second)
-    throttledSource.via(bufferedFlow).to(slowSink).run()
-
-    ()
+    val _ = throttledSource.via(bufferedFlow).to(slowSink).run()
   }
 }

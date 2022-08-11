@@ -51,7 +51,6 @@ object GraphCycles {
   )
 
   def main(args: Array[String]): Unit = {
-    fibonacci.run()
-    ()
+    val _ = fibonacci.run()
   }
 }

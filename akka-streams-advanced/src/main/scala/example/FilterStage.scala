@@ -80,7 +80,6 @@ object FilterStage {
     )
 
   def main(args: Array[String]): Unit = {
-    graph.run()
-    ()
+    val _ = graph.run()
   }
 }

@@ -17,8 +17,7 @@ object MergeHubBroadcastHubExample {
     val sink: Sink[Int, NotUsed] =
       merge.to(Sink.foreach[Int](println)).run()
 
-    Source(1 to 10).runWith(sink)
-    ()
+    val _ = Source(1 to 10).runWith(sink)
   }
 
   def broadcastHub(): Unit = {
@@ -28,8 +27,7 @@ object MergeHubBroadcastHubExample {
     val source: Source[Int, NotUsed] =
       Source(1 to 10).runWith(broadcast)
 
-    source.runWith(Sink.foreach[Int](println))
-    ()
+    val _ = source.runWith(Sink.foreach[Int](println))
   }
 
   def pubsub(): Unit = {
@@ -44,8 +42,6 @@ object MergeHubBroadcastHubExample {
     subscriber.map(_.length).runWith(Sink.foreach(n => println(s"Number: $n")))
 
     Source(List("Chicago", "Seattle", "Miami")).runWith(publisher)
-    Source(List("A", "B", "C")).runWith(publisher)
-
-    ()
+    val _ = Source(List("A", "B", "C")).runWith(publisher)
   }
 }

@@ -21,10 +21,8 @@ object KillswitchExample {
         .to(sink)
         .run()
 
-    system.scheduler.scheduleOnce(3.seconds) {
+    val _ = system.scheduler.scheduleOnce(3.seconds) {
       switch.shutdown()
     }
-
-    ()
   }
 }

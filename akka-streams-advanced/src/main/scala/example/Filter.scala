@@ -54,7 +54,6 @@ object Main {
       }
     )
 
-    graph.run()
-    ()
+    val _ = graph.run()
   }
 }

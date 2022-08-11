@@ -3,7 +3,8 @@ addCommandAlias(
   List(
     "scalafmtCheckAll",
     "akka-streams-advanced/mdoc",
-    "akka-streams-basics/mdoc"
+    "akka-streams-basics/mdoc",
+    "akka-typed/mdoc"
   ).mkString(";")
 )
 
@@ -53,6 +54,21 @@ lazy val `akka-streams-basics` = project
       "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
       "com.typesafe.akka" %% "akka-stream-typed" % "2.6.19",
       "com.typesafe.akka" %% "akka-stream-testkit" % "2.6.19" % Test,
+      "com.typesafe.akka" %% "akka-testkit" % "2.6.19" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.11" % Test
+    )
+  )
+  .enablePlugins(MdocPlugin)
+
+lazy val `akka-typed` = project
+  .in(file("akka-typed"))
+  .settings(moduleName := "akka-typed")
+  .settings(baseSettings: _*)
+  .settings(mdocModule: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor-typed" % "2.6.19",
+      "com.typesafe.akka" %% "akka-stream-typed" % "2.6.19",
       "com.typesafe.akka" %% "akka-testkit" % "2.6.19" % Test,
       "org.scalatest" %% "scalatest" % "3.2.11" % Test
     )
